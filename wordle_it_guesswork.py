@@ -53,17 +53,6 @@ class Wordle :
         
         return word_information
 
-def make_guess(possible_words): 
-    guess = np.random.choice(possible_words)
-    return guess
-
-words = []
-with open("words.txt", "r") as file :
-    lines = file.readlines()
-    for line in lines :
-        line_words = line.split()
-        words.extend(line_words)
-
 class WordleBot :
     possible_words = []
     def play(self, wordle) :
@@ -82,9 +71,20 @@ class WordleBot :
             results.append([answer, num_guesses])
             # time.sleep(0.001)
         
-        with open('output.txt', 'w') as file:
+        with open('output_guesswork.txt', 'w') as file:
             for result in results:
                 file.write(str(result) + '\n')
+
+def make_guess(possible_words): 
+    guess = np.random.choice(possible_words)
+    return guess
+
+words = []
+with open("words.txt", "r") as file :
+    lines = file.readlines()
+    for line in lines :
+        line_words = line.split()
+        words.extend(line_words)
 
 Dhanush = WordleBot()
 Dhanush.simulate_play()
