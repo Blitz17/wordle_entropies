@@ -4,8 +4,6 @@ alphabet_keys = {}
 for letter in string.ascii_lowercase:
     alphabet_keys[letter] = 0
 
-print(alphabet_keys)
-
 words = []
 with open("words.txt", "r") as file :
     lines = file.readlines()
@@ -19,11 +17,8 @@ for word in words:
     for letter in unique_letters:
         alphabet_keys[letter] += 1
 
-print(alphabet_keys)
-
 with open('letter_prob.txt', 'w') as file:
     file.write(str(alphabet_keys) + '\n')
     for letter in alphabet_keys.keys():
-        print(str(letter) + " : " + str(alphabet_keys[letter]/14855*100))
         file.write(str(letter) + " : " + str(alphabet_keys[letter]/14855*100) + '\n')
 

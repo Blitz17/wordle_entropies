@@ -89,10 +89,14 @@ class Strategy :
 
     def eliminate_words(self, possible_words) :
         return [word for word in possible_words if not self.eliminate_word(word)]
+
+    def make_guess(self, possible_words) : 
+        guess = np.random.choice(possible_words)
+        return guess
                 
 class WordleBot :
     possible_words = []
-    def simulate_play(self) :
+    def simulate_play(self, words) :
         results = []
         wins = 0
         losses = 0
@@ -118,15 +122,11 @@ class WordleBot :
         strategy = Strategy().create()
         while wordle.state() == State.in_progress :
             self.possible_words = wordle.possible_words
-            guess_word = self.make_guess(self.possible_words)
+            guess_word = strategy.make_guess(self.possible_words)
             results = wordle.guess(guess_word)
             strategy.update(results)
             wordle.possible_words = strategy.eliminate_words(self.possible_words)
         return len(wordle.guesses)
-        
-    def make_guess(self, possible_words) : 
-        guess = np.random.choice(possible_words)
-        return guess
 
 words = []
 with open("words.txt", "r") as file :
@@ -136,4 +136,4 @@ with open("words.txt", "r") as file :
         words.extend(line_words)
 
 Dhanush = WordleBot()
-Dhanush.simulate_play()
+Dhanush.simulate_play(words)
