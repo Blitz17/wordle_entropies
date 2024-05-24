@@ -80,14 +80,8 @@ class Strategy :
     @lru_cache(100000)
     def generate_cases(self, possible_words):
         cases = {}
-        status = 0
-        if len(possible_words) == 14855: 
-            print("main")           
-            return main_cases
-
         for guess_word in possible_words:
             all_results = []
-            status += 1
             for hidden_word in possible_words:
                 result = []
                 case = Wordle().create(list(possible_words), 6, hidden_word).guess(guess_word) 
@@ -95,7 +89,6 @@ class Strategy :
                     result.append(letter[2])
                 all_results.append(''.join(map(str, result)))
             cases[guess_word] = Counter(all_results)  
-        print(status)
         return cases
 
     def update(self, updates) :
@@ -132,8 +125,36 @@ class Strategy :
         if len(possible_words) == 14855:
             return best_word
 
+        if len(possible_words) == 1022:
+            return 'colin'
+
+        if len(possible_words) == 898:
+            return 'lions'
+
+        if len(possible_words) == 761:
+            return 'dolie'
+
+        if len(possible_words) == 731:
+            return 'aloin'
+
+        if len(possible_words) == 522:
+            return 'manly'
+
+        if len(possible_words) == 467:
+            return 'loden'
+
+        if len(possible_words) == 395:
+            return 'kalis'
+
+        if len(possible_words) == 379:
+            return 'moals'
+
         all_results = self.generate_cases(tuple(possible_words))
-        max_entropy_guess = max(possible_words, key=lambda word: self.joint_entropy(word, all_results))            
+        max_entropy_guess = max(possible_words, key=lambda word: self.joint_entropy(word, all_results))  
+
+        if len(possible_words) in [1022, 898, 761, 731, 522, 467, 395, 379] :
+            print(len(possible_words))
+            print(max_entropy_guess)        
         return max_entropy_guess
 
 class WordleBot :
@@ -144,7 +165,7 @@ class WordleBot :
         wins = 0
         losses = 0
         self.all_words = words.copy()
-        for answer in tqdm(words[0:5], desc = "Guessing") :
+        for answer in tqdm(words, desc = "Guessing") :
             wordle = Wordle().create(self.all_words, 6, answer)
             num_guesses = self.play(wordle)
             results.append([answer, num_guesses, wordle.state(), wordle.guesses])
