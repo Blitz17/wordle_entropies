@@ -1,1 +1,5 @@
 ['rossa', 3, 1, ['tares', 'sharn', 'rossa']]
+['jetty', 4, 1, ['tares', 'lithe', 'netop', 'jetty']]
+['wizzo', 4, 1, ['tares', 'colin', 'dimbo', 'wizzo']]
+['cuppa', 4, 1, ['tares', 'aloin', 'pucka', 'cuppa']]
+['cohoe', 5, 1, ['tares', 'dolie', 'bonce', 'coupe', 'cohoe']]

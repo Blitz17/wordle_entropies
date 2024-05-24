@@ -3,6 +3,7 @@ from tqdm import tqdm
 from collections import Counter
 from more_itertools import partition, flatten, chunked
 import ast
+import re
 from functools import lru_cache
 
 class State :
@@ -79,10 +80,13 @@ class Strategy :
     @lru_cache(100000)
     def generate_cases(self, possible_words):
         cases = {}
-        status = 1
+        status = 0
+        if len(possible_words) == 14855: 
+            print("main")           
+            return main_cases
+
         for guess_word in possible_words:
             all_results = []
-            print(status)
             status += 1
             for hidden_word in possible_words:
                 result = []
@@ -91,9 +95,7 @@ class Strategy :
                     result.append(letter[2])
                 all_results.append(''.join(map(str, result)))
             cases[guess_word] = Counter(all_results)  
-        if len(possible_words) == 14855:
-            with open('cases.txt', 'w') as file:
-                    file.write(str(cases) + '\n')
+        print(status)
         return cases
 
     def update(self, updates) :
@@ -126,9 +128,12 @@ class Strategy :
     def make_guess(self, possible_words):
         if len(possible_words) == 1:
             return possible_words[0]
+        
+        if len(possible_words) == 14855:
+            return best_word
 
         all_results = self.generate_cases(tuple(possible_words))
-        max_entropy_guess = max(possible_words, key=lambda word: self.joint_entropy(word, all_results))
+        max_entropy_guess = max(possible_words, key=lambda word: self.joint_entropy(word, all_results))            
         return max_entropy_guess
 
 class WordleBot :
@@ -139,7 +144,7 @@ class WordleBot :
         wins = 0
         losses = 0
         self.all_words = words.copy()
-        for answer in tqdm(words[0:1], desc = "Guessing") :
+        for answer in tqdm(words[0:5], desc = "Guessing") :
             wordle = Wordle().create(self.all_words, 6, answer)
             num_guesses = self.play(wordle)
             results.append([answer, num_guesses, wordle.state(), wordle.guesses])
@@ -172,6 +177,19 @@ with open("words.txt", "r") as file :
     for line in lines :
         line_words = line.split()
         words.extend(line_words)
-        
+
+with open("cases.txt", "r") as file :
+    lines = file.readlines()
+    counter_pattern = re.compile(r"Counter\((\{.*?\})\)")
+    modified_string = counter_pattern.sub(r'\1', lines[0])
+    cases = ast.literal_eval(modified_string)
+    main_cases = {key: Counter(value) for key, value in cases.items()}
+
+with open('entropies.txt', 'w') as file:
+    entropies = {word : Strategy().joint_entropy(word, main_cases) for word in words}
+    file.write(str(entropies) + '\n')
+    
+best_word = max(entropies, key=entropies.get)
+
 Dhanush = WordleBot()
 Dhanush.simulate_play(words)
