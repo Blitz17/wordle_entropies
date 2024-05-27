@@ -2,7 +2,7 @@ from collections import Counter
 import ast
 import re
 
-with open("cases.txt", "r") as file :
+with open("answer_cases.txt", "r") as file :
     lines = file.readlines()
     print(type(lines[0]))
     counter_pattern = re.compile(r"Counter\((\{.*?\})\)")
