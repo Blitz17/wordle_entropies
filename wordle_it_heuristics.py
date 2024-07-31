@@ -36,19 +36,23 @@ class Wordle :
             return State.in_progress
     
     def guess(self, guess) :
-        if guess not in self.guesses : 
-            self.guesses.append(guess)
-            self.possible_words.remove(guess)
+        results = [letter_result.grey] * len(guess)
+        answer_letter_count = {}
         
-        results = []
-
-        for guess_letter, actual_letter in zip(guess, self.answer) :
-            if guess_letter == actual_letter :
-                results.append(letter_result.green)
-            elif guess_letter in self.answer :
-                results.append(letter_result.yellow)
-            else :
-                results.append(letter_result.grey)
+        for i in range(len(guess)):
+            if guess[i] == self.answer[i]:
+                results[i] = letter_result.green
+            else:
+                if self.answer[i] in answer_letter_count:
+                    answer_letter_count[self.answer[i]] += 1
+                else:
+                    answer_letter_count[self.answer[i]] = 1
+        
+        for i in range(len(guess)):
+            if results[i] != letter_result.green:  # Only check non-green letters
+                if guess[i] in answer_letter_count and answer_letter_count[guess[i]] > 0:
+                    results[i] = letter_result.yellow
+                    answer_letter_count[guess[i]] -= 1
         
         word_information = []
         for (position, letter) in enumerate(guess) : 
