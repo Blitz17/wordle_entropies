@@ -39,19 +39,23 @@ class Wordle :
             return State.in_progress
     
     def guess(self, guess) :
-        if guess not in self.guesses : 
-            self.guesses.append(guess)
-            self.possible_words.remove(guess)
+        results = [letter_result.grey] * len(guess)
+        answer_letter_count = {}
         
-        results = []
-
-        for guess_letter, actual_letter in zip(guess, self.answer) :
-            if guess_letter == actual_letter :
-                results.append(letter_result.green)
-            elif guess_letter in self.answer :
-                results.append(letter_result.yellow)
-            else :
-                results.append(letter_result.grey)
+        for i in range(len(guess)):
+            if guess[i] == self.answer[i]:
+                results[i] = letter_result.green
+            else:
+                if self.answer[i] in answer_letter_count:
+                    answer_letter_count[self.answer[i]] += 1
+                else:
+                    answer_letter_count[self.answer[i]] = 1
+        
+        for i in range(len(guess)):
+            if results[i] != letter_result.green:  # Only check non-green letters
+                if guess[i] in answer_letter_count and answer_letter_count[guess[i]] > 0:
+                    results[i] = letter_result.yellow
+                    answer_letter_count[guess[i]] -= 1
         
         word_information = []
         for (position, letter) in enumerate(guess) : 
@@ -95,6 +99,9 @@ class Strategy :
                 all_results.append(''.join(map(str, result)))
             cases[guess_word] = Counter(all_results)  
             print(status)
+        
+        with open('answer_cases.txt', 'w') as file:
+            file.write(str(cases) + '\n')
         return cases
 
     def update(self, updates) :
@@ -128,8 +135,8 @@ class Strategy :
         if len(possible_words) == 1:
             return possible_words[0]
         
-        if len(possible_words) == 14855:
-            return best_word
+        # if len(possible_words) == 14855:
+        #     return best_word
 
         # if len(possible_words) == 1136:
         #     return 'colin'
@@ -172,7 +179,10 @@ class WordleBot :
         losses = 0
         self.all_words = all_words.copy()
         self.possible_words = answers.copy()
+        print(len(all_words))
+        print(len(answers))
         for answer in tqdm(answers[0:100], desc = "Guessing") :
+            print(answers)
             wordle = Wordle().create(self.all_words, 6, answer)
             num_guesses = self.play(wordle)
             results.append([answer, num_guesses, wordle.state(), wordle.guesses])
@@ -197,6 +207,7 @@ class WordleBot :
             results = wordle.guess(guess_word)
             strategy.update(results)
             wordle.possible_words = strategy.eliminate_words(self.possible_words)
+            print(len(wordle.possible_words))
         return len(wordle.guesses)
 
 all_words = []
@@ -220,12 +231,12 @@ with open("answer_cases.txt", "r") as file :
     cases = ast.literal_eval(modified_string)
     main_cases = {key: Counter(value) for key, value in cases.items()}
 
-with open('answer_entropies.txt', 'w') as file:
-    entropies = {word : Strategy().joint_entropy(word, main_cases) for word in all_words}
-    file.write(str(entropies) + '\n')
+# with open('answer_entropies.txt', 'w') as file:
+#     entropies = {word : Strategy().joint_entropy(word, main_cases) for word in all_words}
+#     file.write(str(entropies) + '\n')
     
-best_word = max(entropies, key=entropies.get)
-print(best_word)
+# best_word = max(entropies, key=entropies.get)
+# print(best_word)
 
-# Dhanush = WordleBot()
-# Dhanush.simulate_play(answers, all_words)
+Dhanush = WordleBot()
+Dhanush.simulate_play(answers[0:100], all_words)
