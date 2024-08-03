@@ -11,20 +11,22 @@ class State :
     win = 1
     loss = -1
 
+
 class letter_result :
     grey = -1
     yellow = 0
     green = 1
 
+
 class Wordle :
     max_guesses = 0
     guesses = []
     answer = ""
-    possible_words = []
+    all_words = []
     
-    def create(self, possible_words, max_guesses = 6, answer = "cream") :
+    def create(self, all_words, max_guesses = 6, answer = "cream") :
         self.answer = answer
-        self.possible_words = possible_words.copy()
+        self.all_words = all_words.copy()
         self.guesses = []
         self.max_guesses = max_guesses
         return self
@@ -39,8 +41,8 @@ class Wordle :
     
     def guess(self, guess) :
         results = [letter_result.grey] * len(guess)
-        answer_letter_count = {}
-        
+        answer_letter_count = {}   
+
         for i in range(len(guess)):
             if guess[i] == self.answer[i]:
                 results[i] = letter_result.green
@@ -58,10 +60,12 @@ class Wordle :
         
         self.guesses.append(guess)
         word_information = []
+
         for (position, letter) in enumerate(guess) : 
             word_information.append([position, letter, results[position]])
         
         return word_information
+
 
 class Strategy :
     correct_letters = set()
@@ -80,29 +84,31 @@ class Strategy :
     def joint_entropy(self, word, counted_results):
         entropy = 0
         total_words = sum(counted_results[word].values())
+
         for result, counts in counted_results[word].items():
             p = (counts / total_words)
             entropy -= p * np.log(p)
+
         return entropy
 
-    @lru_cache(100000)
     def generate_cases(self, possible_words, answers):
         cases = {}
         status = 0
+
         for guess_word in possible_words:
             all_results = []
             status += 1
+
             for hidden_word in answers:
                 result = []
                 case = Wordle().create(list(possible_words), 6, hidden_word).guess(guess_word) 
                 for letter in case:                        
                     result.append(letter[2])
                 all_results.append(''.join(map(str, result)))
+
             cases[guess_word] = Counter(all_results)  
             print(status)
             
-        # with open('answer_cases.txt', 'w') as file:
-        #     file.write(str(cases) + '\n')
         return cases
 
     def update(self, updates) :
@@ -163,13 +169,15 @@ class WordleBot :
         wins = 0
         losses = 0
         self.all_words = all_words.copy()
+
         for answer in tqdm(answers, desc = "Guessing") :
             self.possible_words = answers.copy()
             self.res = []
-            print(answer)
+            print('\n' + answer)
             wordle = Wordle().create(self.all_words, 6, answer)
             num_guesses = self.play(wordle)
             results.append([answer, num_guesses, wordle.state(), wordle.guesses, self.res])
+
             if wordle.state() == 1 :
                 wins += 1
             else :
@@ -185,18 +193,23 @@ class WordleBot :
 
     def play(self, wordle) :
         strategy = Strategy().create(self.possible_words, self.all_words)
+
         while wordle.state() == State.in_progress :
-            guess_word = strategy.make_guess(wordle.possible_words, self.possible_words)
+            guess_word = strategy.make_guess(wordle.all_words, self.possible_words)
             results = wordle.guess(guess_word)
             strategy.update(results)
             self.res.append(results)
-            wordle.possible_words = strategy.eliminate_words(wordle.possible_words)
+            wordle.all_words = strategy.eliminate_words(wordle.all_words)
             self.possible_words = strategy.eliminate_words(self.possible_words)
+
         return len(wordle.guesses)
+
+
 
 all_words = []
 with open("words.txt", "r", encoding="utf8") as file :
     lines = file.readlines()
+
     for line in lines :
         line_words = line.split()
         all_words.extend(line_words)
@@ -204,6 +217,7 @@ with open("words.txt", "r", encoding="utf8") as file :
 answers = []
 with open("answers.txt", "r", encoding="utf8") as file :
     lines = file.readlines()
+
     for line in lines :
         line_words = line.split()
         answers.extend(line_words)
@@ -215,9 +229,9 @@ with open("answer_cases.txt", "r") as file :
     cases = ast.literal_eval(modified_string)
     main_cases = {key: Counter(value) for key, value in cases.items()}
 
-with open('answer_entropies.txt', 'w') as file:
-    entropies = {word : Strategy().joint_entropy(word, main_cases) for word in all_words}
-    file.write(str(entropies) + '\n')
+with open('answer_entropies.txt', 'r') as file:
+    lines = file.readlines()
+    entropies = ast.literal_eval(lines[0])
     
 best_word = max(entropies, key=entropies.get)
 
