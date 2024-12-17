@@ -139,7 +139,6 @@ class Strategy :
             
         print(self.correct_letters)
 
-    
     def eliminate_word(self, word) : 
         def containedInFirst(a, b):
             a_count = Counter(a)

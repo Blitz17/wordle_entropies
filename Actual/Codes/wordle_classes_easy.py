@@ -1,7 +1,6 @@
 import numpy as np 
 from tqdm import tqdm
 from collections import Counter
-import json
 
 class State :
     in_progress = 0
@@ -139,8 +138,6 @@ class Strategy :
                 letters_checked.append(letter)
             
         print(self.correct_letters)
-        for i in range(5):
-            print(self.possible_letters[i])
     
     def eliminate_word(self, word) : 
         def containedInFirst(a, b):
@@ -212,7 +209,7 @@ class WordleBot :
         wins = 0
         losses = 0
         self.all_words = all_words.copy()
-        for answer in tqdm(answers[2103:2104], desc = "Guessing") :
+        for answer in tqdm(answers, desc = "Guessing") :
             self.answers = answers.copy()
             self.res = []
             print('\n' + "Guess Word:" + answer)
@@ -248,7 +245,6 @@ class WordleBot :
             results = wordle.guess(guess_word)
             strategy.update(results)
             self.res.append(results)
-            # wordle.all_words = wordle.all_words.remove(guess_word)
             self.answers = strategy.eliminate_words(self.answers)
             print(self.answers)
         self.second_guesses = strategy.second_guesses
