@@ -36,8 +36,6 @@ for word in guesses:
     column.append(case_counters[word])
     columns_guesses.append(column)
 
-# print(columns_guesses[0])
-
 df_guesses = pd.DataFrame(columns_guesses, columns=['id', 'guess', 'initial_entropy', 'intial_counter'])
 
 print(df_guesses)
