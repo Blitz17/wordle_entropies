@@ -25,6 +25,4 @@ for word, entropy in top_25:
 
 df_top_25 = pd.DataFrame(columns_top_25, columns=['id', 'top_25_word', 'guess_id', 'intial_entropy'])
 
-print(df_top_25)
-
 df_top_25.to_excel('Actual/Codes/top_25.xlsx', index=False)

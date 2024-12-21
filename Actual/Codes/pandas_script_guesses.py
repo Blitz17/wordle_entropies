@@ -38,6 +38,4 @@ for word in guesses:
 
 df_guesses = pd.DataFrame(columns_guesses, columns=['id', 'guess', 'initial_entropy', 'intial_counter'])
 
-print(df_guesses)
-
 df_guesses.to_excel('Actual/Codes/guesses.xlsx', index=False)
