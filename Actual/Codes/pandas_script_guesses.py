@@ -6,6 +6,7 @@ import pandas as pd
 entropies = ""
 case_counters = ""
 guesses = []
+answers = []
 with open("Actual/Codes/answer_entropies.txt", "r", encoding="utf8") as file :
     entropies = file.readline()
     entropies = ast.literal_eval(entropies)
@@ -23,6 +24,12 @@ with open("Actual/Codes/words.txt", "r", encoding="utf8") as file :
         line_words = word.split()
         guesses.extend(line_words)
 
+with open("Actual/Codes/answers.txt", "r", encoding="utf8") as file :
+    words = file.readlines()
+    for word in words : 
+        line_words = word.split()
+        answers.extend(line_words)
+
 guesses.sort()
 
 id = 0
@@ -34,8 +41,12 @@ for word in guesses:
     column.append(word)
     column.append(entropies[word])
     column.append(case_counters[word])
+    if word in answers :
+        column.append(1)
+    else :
+        column.append(0)
     columns_guesses.append(column)
 
-df_guesses = pd.DataFrame(columns_guesses, columns=['id', 'guess', 'initial_entropy', 'intial_counter'])
+df_guesses = pd.DataFrame(columns_guesses, columns=['id', 'guess', 'initial_entropy', 'intial_counter', 'is_answer_flag'])
 
 df_guesses.to_excel('Actual/Codes/guesses.xlsx', index=False)

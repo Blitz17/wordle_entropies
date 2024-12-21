@@ -1,10 +1,6 @@
-from collections import Counter
 import ast
-import re
 import pandas as pd
 
-entropies = ""
-case_counters = ""
 answers = []
 with open("Actual/Codes/output_answer_easy.txt", "r", encoding="utf8") as file :
     answers_strings = file.readlines()
