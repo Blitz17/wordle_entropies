@@ -14,16 +14,16 @@ id = 0
 columns_answers = []
 for word in answers:
     column = []
-    column.append(id)
-    id += 1
-    answers_id = df_guesses.loc[df_guesses['guess'] == word[0]]
-    column.append(answers_id.iloc[0]['id'])
     for guess in word[3]:
-        guess_column = column.copy()
+        column = []
+        column.append(id)
+        answers_id = df_guesses.loc[df_guesses['guess'] == word[0]]
+        column.append(answers_id.iloc[0]['id'])
         guess_id = df_guesses.loc[df_guesses['guess'] == guess]
-        guess_column.append(guess_id.iloc[0]['id'])
-        guess_column.append(word[4][word[3].index(guess)])
-        columns_answers.append(guess_column)
+        column.append(guess_id.iloc[0]['id'])
+        column.append(word[4][word[3].index(guess)])
+        id += 1
+        columns_answers.append(column)
 
 df_answer_guess_pair = pd.DataFrame(columns_answers, columns=['id', 'answer_id', 'guess_id', 'result'])
 

@@ -84,7 +84,7 @@ class Strategy :
             p = (counts / total_words)
             entropy -= p * np.log(p)
 
-        return entropy
+        return float(np.floor(entropy*1000000)/1000000)
 
     def generate_cases(self, all_words, answers):
         cases = {}
@@ -165,46 +165,53 @@ class Strategy :
     def eliminate_words(self, answers) :
         return [word for word in answers if not self.eliminate_word(word)]
 
-    def make_guess(self, all_words, answers, best_word, x):
+    def make_guess(self, all_words, answers, best_word, best_word_entropy, x):
+        entropy = 0
         if len(answers) == 2:
             print("Guess : " + answers[0])
-            return answers[0]
+            return answers[0], entropy
         
         if len(answers) == 1:
             print("Guess : " + answers[0])
-            return answers[0]
+            return answers[0], entropy
         
         if len(all_words) == 1:
             print("Guess : " + all_words[0])
-            return all_words[0]
+            return all_words[0], entropy
 
         if x == 0:
             print("Guess : " + best_word)
-            return best_word
+            return best_word, best_word_entropy
         
         if x == 1:
             print(self.update_2)
             if self.update_2 in self.second_guesses:
-                print("Guess2 : " + self.second_guesses[self.update_2])
+                guess, guess_entropy = self.second_guesses[self.update_2]
+                print("Guess2 : " + guess)
                 return self.second_guesses[self.update_2]
 
         all_results = self.generate_cases(tuple(all_words), tuple(answers))
         max_entropy_guess = max(all_words, key=lambda word: self.joint_entropy(word, all_results))  
+        entropy = self.joint_entropy(max_entropy_guess, all_results)
         self.current_guess = max_entropy_guess
         if x == 1:
             if self.update_2 not in self.second_guesses:
-                self.second_guesses[self.update_2] = max_entropy_guess
+                self.second_guesses[self.update_2] = (max_entropy_guess, entropy)
                 print("2nd Guesses : " + str(self.second_guesses))
 
         print('\n' + "Guess : " + max_entropy_guess)
-        return max_entropy_guess
+        return (max_entropy_guess, entropy)
 
 class WordleBot :
     answers = []
     all_words = []
     res = []
+    possible_words_count = []
+    remaining_words_count = []
+    entropies = []
+    best_word_entropy = 0
     second_guesses = {}
-    def simulate_play(self, answers, all_words, best_word) :
+    def simulate_play(self, answers, all_words, best_word, best_word_entropy) :
         results = []
         wins = 0
         losses = 0
@@ -212,32 +219,37 @@ class WordleBot :
         for answer in tqdm(answers, desc = "Guessing") :
             self.answers = answers.copy()
             self.res = []
+            self.possible_words_count = []
+            self.remaining_words_count = []
+            self.entropies = []
             print('\n' + "Guess Word:" + answer)
             wordle = Wordle().create(self.all_words, 6, answer)
-            num_guesses = self.play(wordle, best_word)
-            results.append([answer, num_guesses, wordle.state(), wordle.guesses, self.res])
-
+            num_guesses = self.play(wordle, best_word, best_word_entropy)
+            results.append([answer, num_guesses, wordle.state(), wordle.guesses, self.res, self.possible_words_count, self.remaining_words_count, self.entropies])
+            print(results[-1])
             if wordle.state() == 1 :
                 wins += 1
             else :
                 losses += 1
-        
-        with open('output_answer_easy2.txt', 'a') as file:
+
+        print(results[0:5])
+
+        with open('output_answer_easy2.txt', 'w') as file:
             for result in results:
                 file.write(str(result) + '\n')
         
-        with open('second_guesses_easy2.txt', 'a') as file:
+        with open('second_guesses_easy2.txt', 'w') as file:
             file.write(str(self.second_guesses) + '\n')
 
         print("Total :" +  str(wins + losses))
         print("Wins :" +  str(wins))
         print("Losses :" +  str(losses))
 
-    def play(self, wordle, best_word) :
+    def play(self, wordle, best_word, best_word_entropy) :
         strategy = Strategy().create(self.answers, self.all_words, self.second_guesses)
         x = 0
         while wordle.state() == State.in_progress :
-            guess_word = strategy.make_guess(wordle.all_words, self.answers, best_word, x)
+            guess_word, entropy = strategy.make_guess(wordle.all_words, self.answers, best_word, best_word_entropy, x)
             if x == 0 :
                 x = 1
             elif x == 1 :
@@ -245,7 +257,10 @@ class WordleBot :
             results = wordle.guess(guess_word)
             strategy.update(results)
             self.res.append(results)
+            self.possible_words_count.append(len(self.answers))
             self.answers = strategy.eliminate_words(self.answers)
+            self.remaining_words_count.append(len(self.answers))
+            self.entropies.append(entropy)
             print(self.answers)
         self.second_guesses = strategy.second_guesses
         return len(wordle.guesses)
