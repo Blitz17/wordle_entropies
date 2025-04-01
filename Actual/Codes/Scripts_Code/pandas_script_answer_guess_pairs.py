@@ -2,7 +2,7 @@ import ast
 import pandas as pd
 
 answers = []
-with open("Actual/Codes/output_answer_easy.txt", "r", encoding="utf8") as file :
+with open("Actual/Codes/Data_Code/output_answer_easy.txt", "r", encoding="utf8") as file :
     answers_strings = file.readlines()
     for line in answers_strings:
         answer = ast.literal_eval(line)

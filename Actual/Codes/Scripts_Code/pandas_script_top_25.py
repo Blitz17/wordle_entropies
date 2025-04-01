@@ -1,7 +1,7 @@
 import ast
 import pandas as pd
 
-with open("Actual/Codes/answer_entropies.txt", "r", encoding="utf8") as file :
+with open("Actual/Codes/Data_Code/answer_entropies.txt", "r", encoding="utf8") as file :
     lines = file.readlines()
 
 x = ast.literal_eval(lines[0])
@@ -26,3 +26,5 @@ for word, entropy in top_25:
 df_top_25 = pd.DataFrame(columns_top_25, columns=['id', 'top_25_word', 'guess_id', 'intial_entropy'])
 
 df_top_25.to_excel('Actual/Codes/top_25.xlsx', index=False)
+
+print("Hi")

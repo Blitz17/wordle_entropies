@@ -7,24 +7,24 @@ entropies = ""
 case_counters = ""
 guesses = []
 answers = []
-with open("Actual/Codes/answer_entropies.txt", "r", encoding="utf8") as file :
+with open("Actual/Codes/Data_Code/answer_entropies.txt", "r", encoding="utf8") as file :
     entropies = file.readline()
     entropies = ast.literal_eval(entropies)
 
-with open("Actual/Codes/answer_cases.txt", "r", encoding="utf8") as file :
+with open("Actual/Codes/Data_Code/answer_cases.txt", "r", encoding="utf8") as file :
     lines = file.readlines()
     counter_pattern = re.compile(r"Counter\((\{.*?\})\)")
     modified_string = counter_pattern.sub(r'\1', lines[0])
     cases = ast.literal_eval(modified_string)
     case_counters = {key: Counter(value) for key, value in cases.items()}
 
-with open("Actual/Codes/words.txt", "r", encoding="utf8") as file :
+with open("Actual/Codes/Data_Code/words.txt", "r", encoding="utf8") as file :
     words = file.readlines()
     for word in words : 
         line_words = word.split()
         guesses.extend(line_words)
 
-with open("Actual/Codes/answers.txt", "r", encoding="utf8") as file :
+with open("Actual/Codes/Data_Code/answers.txt", "r", encoding="utf8") as file :
     words = file.readlines()
     for word in words : 
         line_words = word.split()
